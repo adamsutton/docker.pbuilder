@@ -11,22 +11,15 @@ RUN $_apt_update && $_apt_install debhelper             && $_apt_clean
 RUN $_apt_update && $_apt_install pkg-config            && $_apt_clean
 RUN $_apt_update && $_apt_install python                && $_apt_clean
 RUN $_apt_update && $_apt_install wget curl             && $_apt_clean
-RUN $_apt_update && $_apt_install gcc-arm-linux-gnueabi && $_apt_clean
+
+RUN $_apt_update && %_apt_install libc6-dev-i386        && $_apt_clean
 
 RUN mkdir /build /out
 
 RUN cd /build\
-  && wget http://www.openssl.org/source/openssl-1.0.0d.tar.gz \
-  && tar xf openssl-1.0.0d.tar.gz \
-  && cd openssl-1.0.0d \
-  && make CC=arm-linux-gnueabi-gcc AR="arm-linux-gnueabi-ar r"\
-  && cp -rL include/openssl /usr/arm-linux-gnueabi/include\
-  && cp *.a /usr/arm-linux-gnueabi/lib
-
-RUN cd /build\
   && git clone https://github.com/tvheadend/tvheadend.git tvheadend\
   && cd tvheadend\
-  && ARCH=arm CC=arm-linux-gnueabi-gcc LDFLAGS="-lssl -lcrypto" ./configure --enable-bundle\
+  && ARCH=i386 CFLAGS=-m32 ../configure\
   && make
 
 VOLUME /build
